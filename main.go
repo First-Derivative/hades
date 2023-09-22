@@ -22,7 +22,8 @@ func main() {
 		})
 	})
 
-	r.POST("/users", controllers.Signup)
+	r.POST("/signup", controllers.Signup)
+	r.POST("/login", controllers.Login)
 
 	r.Run(fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT")))
 
