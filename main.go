@@ -20,6 +20,7 @@ func main() {
 
 	r.POST("/signup", controllers.Signup)
 	r.POST("/login", controllers.Login)
+	r.GET("/logout", controllers.Logout)
 	r.GET("/validate", middleware.RequireAuth, controllers.Validate)
 
 	r.Run(fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT")))

@@ -14,7 +14,6 @@ import (
 func RequireAuth(c *gin.Context) {
 
 	tokenString, err := c.Cookie("Authorization")
-
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"status": "unauthenticated",
@@ -32,11 +31,10 @@ func RequireAuth(c *gin.Context) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+		if float64(time.Now().Unix()) < claims["exp"].(float64) {
+			user_id := claims["sub"].(float64)
 
-			user_id := claims["sub"].(int)
-
-			user, err := services.FindUserById(user_id)
+			user, err := services.FindUserById(int(user_id))
 
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -45,9 +43,8 @@ func RequireAuth(c *gin.Context) {
 			}
 
 			c.Set("user", user)
+			c.Next()
 		}
-
-		c.Next()
 
 	} else {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
