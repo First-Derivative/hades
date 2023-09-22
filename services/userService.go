@@ -50,3 +50,26 @@ func FindUser(user models.User) (*models.User, error) {
 	return &users, nil
 
 }
+
+func FindUserById(id int) (*models.User, error) {
+
+	query := fmt.Sprintf("SELECT * FROM `users` WHERE id = \"%d\"", id)
+
+	res, err := initializers.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	users := models.User{}
+	for res.Next() {
+		var user models.User
+		err := res.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName)
+		if err != nil {
+			log.Fatal("(GetProducts) res.Scan", err)
+		}
+		users = user
+	}
+
+	return &users, nil
+
+}
