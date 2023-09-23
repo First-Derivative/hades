@@ -29,6 +29,9 @@ func CreateUser(user models.User) (*sql.Rows, error) {
 }
 
 func FindUser(user models.User) (*models.User, error) {
+	if user.Email == "" {
+		return nil, fmt.Errorf("User email is empty")
+	}
 
 	query := fmt.Sprintf("SELECT * FROM `users` WHERE email = \"%s\"", user.Email)
 

@@ -24,5 +24,10 @@ func main() {
 	r.GET("/logout", controllers.Logout)
 	r.GET("/validate", middleware.RequireAuth, controllers.Validate)
 
-	r.Run(fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT")))
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "3005"
+	}
+
+	r.Run(fmt.Sprintf("127.0.0.1:%s", PORT))
 }

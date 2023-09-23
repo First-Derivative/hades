@@ -75,6 +75,12 @@ func Login(c *gin.Context) {
 		Password string
 	}
 
+	authorizationCookie, _ := c.Request.Cookie("Authorization")
+	if authorizationCookie != nil {
+		c.Redirect(http.StatusFound, "/validate")
+		return
+	}
+
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid body parameters",

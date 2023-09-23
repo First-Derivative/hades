@@ -14,7 +14,7 @@
 /Godeps/
 
 # Output files
-*.out
+main
 
 # macOS specific files
 .DS_Store
@@ -24,6 +24,5 @@
 
 # IDE-specific files (e.g., Visual Studio Code)
 .vscode/
-
 
 .env 
