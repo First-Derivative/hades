@@ -29,5 +29,9 @@ func main() {
 		PORT = "3005"
 	}
 
-	r.Run(fmt.Sprintf("127.0.0.1:%s", PORT))
+	address := fmt.Sprintf("127.0.0.1:%s", PORT)
+	fmt.Println("Hades server running...")
+	r.Run(address)
+
+	defer initializers.DB.Close()
 }
