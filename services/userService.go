@@ -28,12 +28,24 @@ func CreateUser(user models.User) (*sql.Rows, error) {
 	return res, nil
 }
 
-func FindUser(user models.User) (*models.User, error) {
-	if user.Email == "" {
+func UpdateUserLogin(id int) (*sql.Rows, error) {
+	query := fmt.Sprintf("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id=\"%d\";", id)
+
+	res, err := initializers.DB.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func FindUser(email string) (*models.User, error) {
+	if email == "" {
 		return nil, fmt.Errorf("User email is empty")
 	}
 
-	query := fmt.Sprintf("SELECT * FROM `users` WHERE email = \"%s\"", user.Email)
+	query := fmt.Sprintf("SELECT * FROM `users` WHERE email = \"%s\"", email)
 
 	res, err := initializers.DB.Query(query)
 	if err != nil {
@@ -43,9 +55,9 @@ func FindUser(user models.User) (*models.User, error) {
 	users := models.User{}
 	for res.Next() {
 		var user models.User
-		err := res.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName)
+		err := res.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt)
 		if err != nil {
-			log.Fatal("(GetProducts) res.Scan", err)
+			log.Fatal("(GetUser) res.Scan", err)
 		}
 		users = user
 	}
@@ -66,9 +78,9 @@ func FindUserById(id int) (*models.User, error) {
 	users := models.User{}
 	for res.Next() {
 		var user models.User
-		err := res.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName)
+		err := res.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt)
 		if err != nil {
-			log.Fatal("(GetProducts) res.Scan", err)
+			log.Fatal("(GetUser) res.Scan", err)
 		}
 		users = user
 	}

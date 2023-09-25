@@ -21,7 +21,7 @@ func CreateDB() {
 		switch header {
 		case "users":
 			hasUsers = true
-		case "tokens":
+		case "auth_tokens":
 			hasTokens = true
 		}
 
@@ -31,19 +31,23 @@ func CreateDB() {
 	}
 
 	if !hasUsers {
-		usersQuery := "CREATE TABLE `users` (`id` int PRIMARY KEY AUTO_INCREMENT, `email` varchar(100) NOT NULL UNIQUE, `password` varchar(100) NOT NULL, `firstName` varchar(50), `lastName` varchar(50) );"
+		usersQuery := "CREATE TABLE `users` (`id` int PRIMARY KEY AUTO_INCREMENT, `email` varchar(100) NOT NULL UNIQUE, `password` varchar(100) NOT NULL, `firstName` varchar(50), `lastName` varchar(50),  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, `last_login_at` DATETIME);"
 		_, usersError := DB.Query(usersQuery)
 		if usersError != nil {
 			fmt.Println(fmt.Sprintf("Error creating users table: %s", usersError))
+		} else {
+			fmt.Println("DB: users table created")
 		}
 	}
 
 	if !hasTokens {
-		tokensQuery := "CREATE TABLE `users` (`id` int PRIMARY KEY AUTO_INCREMENT, `email` varchar(100) NOT NULL UNIQUE, `password` varchar(100) NOT NULL, `firstName` varchar(50), `lastName` varchar(50) );"
+		tokensQuery := "CREATE TABLE `auth_tokens` (`id` int PRIMARY KEY AUTO_INCREMENT, `user_id` INT NOT NULL, `access_token` VARCHAR(64) NOT NULL, `refresh_token_id` INT NOT NULL, `refresh_expiry` DATETIME NOT NULL, `invalidated` BOOLEAN, `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, INDEX `idx_refresh_token_id` (refresh_token_id), KEY user_id_idx (user_id));"
 
 		_, tokensError := DB.Query(tokensQuery)
 		if tokensError != nil {
-			fmt.Println(fmt.Sprintf("Error creating tokens table: %s", tokensError))
+			fmt.Println(fmt.Sprintf("Error creating auth_tokens table: %s", tokensError))
+		} else {
+			fmt.Println("DB: auth_tokens table created")
 		}
 	}
 }

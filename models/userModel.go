@@ -5,9 +5,12 @@ import (
 )
 
 type User struct {
-	ID        int
-	Email     string
-	Password  string
-	FirstName sql.NullString
-	LastName  sql.NullString
+	ID          int
+	Email       string
+	Password    string
+	FirstName   sql.NullString
+	LastName    sql.NullString
+	CreatedAt   []byte
+	UpdatedAt   []byte
+	LastLoginAt []byte
 }

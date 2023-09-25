@@ -89,7 +89,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user, err := services.FindUser(models.User{Email: body.Email, Password: body.Password})
+	user, err := services.FindUser(body.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Could not get User",
@@ -106,6 +106,8 @@ func Login(c *gin.Context) {
 
 		return
 	}
+
+	services.UpdateUserLogin(user.ID)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
