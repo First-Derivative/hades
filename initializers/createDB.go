@@ -41,7 +41,7 @@ func CreateDB() {
 	}
 
 	if !hasTokens {
-		tokensQuery := "CREATE TABLE `auth_tokens` (`id` int PRIMARY KEY AUTO_INCREMENT, `user_id` INT NOT NULL, `access_token` VARCHAR(64) NOT NULL, `refresh_token_id` INT NOT NULL, `refresh_expiry` DATETIME NOT NULL, `invalidated` BOOLEAN, `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, INDEX `idx_refresh_token_id` (refresh_token_id), KEY user_id_idx (user_id));"
+		tokensQuery := "CREATE TABLE `auth_tokens` (`id` int PRIMARY KEY AUTO_INCREMENT, `user_id` INT NOT NULL UNIQUE, `access_token` VARCHAR(64) NOT NULL, `refresh_token` VARCHAR(64) NOT NULL, `refresh_expiry` DATETIME NOT NULL, `invalidated` BOOLEAN, `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP, `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, INDEX `idx_refresh_token` (refresh_token), KEY user_id_idx (user_id));"
 
 		_, tokensError := DB.Query(tokensQuery)
 		if tokensError != nil {
