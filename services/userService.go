@@ -28,7 +28,7 @@ func CreateUser(user models.User) (*sql.Rows, error) {
 	return res, nil
 }
 
-func UpdateUserLogin(id int) (*sql.Rows, error) {
+func UpdateUserLoginAt(id int) (*sql.Rows, error) {
 	query := fmt.Sprintf("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id=\"%d\";", id)
 
 	res, err := initializers.DB.Query(query)

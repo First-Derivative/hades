@@ -92,7 +92,7 @@ func Login(c *gin.Context) {
 	user, err := services.FindUser(body.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Could not get User",
+			"error": "User does not exist",
 		})
 
 		return
@@ -107,23 +107,69 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	services.UpdateUserLogin(user.ID)
+	_, updateLoginErr := services.UpdateUserLoginAt(user.ID)
+	if updateLoginErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Server Error: %s", updateLoginErr),
+		})
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		return
+	}
+
+	acessTokenExpiry := time.Now().Add(time.Hour).Unix()
+	refreshTokenExpiry := time.Now().Add(time.Hour * 24 * 31).Unix()
+
+	acessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour).Unix(),
+		"exp": acessTokenExpiry,
+		"iat": time.Now(),
+		"iss": "hades",
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": refreshTokenExpiry,
+		"iat": time.Now(),
+		"iss": "hades",
+	})
+
+	accessTokenString, err := acessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if bcryptErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Could not generate JWT Token",
 		})
 		return
 	}
 
+	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if bcryptErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Could not generate JWT Token",
+		})
+		return
+	}
+
+	var authToken = models.AuthToken{
+		ID:                 0,
+		UserID:             user.ID,
+		AccessToken:        accessTokenString,
+		RefreshToken:       refreshTokenString,
+		Invalidated:        false,
+		RefreshTokenExpiry: refreshTokenExpiry,
+	}
+
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600*15, "/", "", false, true)
+	c.SetCookie("Authorization", accessTokenString, 3600, "/", "", gin.ReleaseMode == "relase", true)
+	c.SetCookie("Authorization-Refresh", refreshTokenString, 3600*15, "/", "", gin.ReleaseMode == "relase", true)
+
+	_, authTokenEror := services.CreateAuthToken(authToken)
+	if authTokenEror != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Server Error: %s", authTokenEror),
+		})
+
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

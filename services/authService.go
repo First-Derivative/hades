@@ -6,11 +6,15 @@ import (
 	"log"
 	"main/initializers"
 	"main/models"
+	"time"
 )
 
 func CreateAuthToken(authToken models.AuthToken) (*sql.Rows, error) {
 	var query string
-	query = fmt.Sprintf("INSERT INTO `auth_token` (user_id, access_token, refresh_token, refresh_expiry) VALUES (\"%d\", \"%s\", \"%s\", \"%s\")", authToken.UserID, authToken.AccessToken, authToken.RefreshToken, string(authToken.RefreshTokenExpiry))
+
+	refreshTokenExpiryUnixTime := time.Unix(authToken.RefreshTokenExpiry, 0)
+	refreshTokenExpiry := refreshTokenExpiryUnixTime.Format("2006-01-02 15:04:05")
+	query = fmt.Sprintf("INSERT INTO `auth_tokens` (user_id, access_token, refresh_token, invalidated, refresh_expiry) VALUES (\"%d\", \"%s\", \"%s\", false, \"%s\")", authToken.UserID, authToken.AccessToken, authToken.RefreshToken, refreshTokenExpiry)
 
 	res, err := initializers.DB.Query(query)
 	if err != nil {
@@ -22,7 +26,7 @@ func CreateAuthToken(authToken models.AuthToken) (*sql.Rows, error) {
 
 func FindAuthToken(refresh_token string) (*models.AuthToken, error) {
 
-	query := fmt.Sprintf("SELECT * FROM `auth_token` WHERE refresh_token= \"%s\" AND invalidated != true", refresh_token)
+	query := fmt.Sprintf("SELECT * FROM `auth_tokens` WHERE refresh_token= \"%s\" AND invalidated != true", refresh_token)
 
 	res, err := initializers.DB.Query(query)
 	if err != nil {
