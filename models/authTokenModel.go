@@ -5,8 +5,8 @@ type AuthToken struct {
 	UserID             int
 	AccessToken        string
 	RefreshToken       string
-	Invalidated        bool
 	RefreshTokenExpiry int64
+	Invalidated        bool
 	CreatedAt          []byte
 	UpdatedAt          []byte
 }
